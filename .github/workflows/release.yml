@@ -47,7 +47,7 @@ jobs:
         run: npm test
 
       - name: Build and package (${{ matrix.platform }})
-        run: npm run dist:${{ matrix.platform }}
+        run: npm run dist:${{ matrix.platform }} -- --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -84,7 +84,6 @@
     },
     "linux": {
       "maintainer": "cheng-yi-cc <450573577@qq.com>",
-      "desktopName": "ModelProof",
       "target": [
         {
           "target": "AppImage",
