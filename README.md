@@ -9,11 +9,28 @@
 方法来源：Bruckner, *One Token Is Enough* (arXiv:2607.10252, 2026)。
 完整许可与引用见 [ATTRIBUTION.md](ATTRIBUTION.md)。
 
-## 本地运行
+## 下载与安装
+
+直接前往 [Releases](https://github.com/cheng-yi-cc/ModelProof/releases) 页面下载对应系统的安装包：
+- **Windows**: `ModelProof-x.x.x-Setup-x64.exe`（安装版）或 `ModelProof-x.x.x-Portable-x64.exe`（便携版）
+- **macOS**: `ModelProof-x.x.x-mac-arm64.dmg`（Apple Silicon）或 `ModelProof-x.x.x-mac-x64.dmg`（Intel）
+- **Linux**: `ModelProof-x.x.x-linux-x64.AppImage` 或 `.deb`
+
+## 本地运行与打包
+
+### 开发运行
 
 ```powershell
-npm install     # 已配置 npmmirror 的 Electron 镜像
-npm start       # 启动桌面应用
+npm install     # 已配置国内镜像加速
+npm start       # 启动桌面开发版
+```
+
+### 本地打包
+
+```powershell
+npm run dist:win    # 打包 Windows 安装包与便携版
+npm run dist:mac    # 打包 macOS DMG 与 Zip（需在 macOS 环境）
+npm run dist:linux  # 打包 Linux AppImage 与 deb（需在 Linux 环境）
 ```
 
 使用步骤：

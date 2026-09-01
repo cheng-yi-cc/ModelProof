@@ -21,6 +21,7 @@ function createWindow() {
     minWidth: 960,
     minHeight: 640,
     title: 'ModelProof — 中转站模型身份辨认',
+    icon: path.join(ROOT, 'assets', 'icon.png'),
     backgroundColor: '#0f1115',
     autoHideMenuBar: true,
     webPreferences: {
