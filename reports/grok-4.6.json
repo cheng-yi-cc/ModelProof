@@ -1,0 +1,308 @@
+{
+ "model": "grok-4.6",
+ "baseUrl": "https://shinemoon.com/v1",
+ "reps": 10,
+ "langs": [
+  "en",
+  "zh"
+ ],
+ "when": "2026-08-26T03:38:27.450Z",
+ "analysis": {
+  "claimed": {
+   "input": "grok-4.6",
+   "resolvedId": null,
+   "resolution": "none",
+   "inReferenceDb": false
+  },
+  "dataQuality": {
+   "totalValidAnswers": 201,
+   "usableCells": 20,
+   "sufficient": true
+  },
+  "top": [
+   {
+    "model": "x-ai/grok-4.3",
+    "family": "grok",
+    "jsd": 0.3035434083308247,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.03222468588322247
+   },
+   {
+    "model": "deepseek/deepseek-chat-v3.1",
+    "family": "deepseek",
+    "jsd": 0.30531831553554023,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.0336289726533629
+   },
+   {
+    "model": "qwen/qwen3.6-flash",
+    "family": "qwen",
+    "jsd": 0.3249434532835234,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.05543237250554324
+   },
+   {
+    "model": "qwen/qwen3.6-27b",
+    "family": "qwen",
+    "jsd": 0.3252328601023697,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.05565410199556541
+   },
+   {
+    "model": "z-ai/glm-5v-turbo",
+    "family": "glm",
+    "jsd": 0.32776487538469634,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.05934959349593496
+   },
+   {
+    "model": "nvidia/nemotron-3-ultra-550b-a55b",
+    "family": "nemotron",
+    "jsd": 0.3278635807063105,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.059645232815964525
+   },
+   {
+    "model": "z-ai/glm-4.7",
+    "family": "glm",
+    "jsd": 0.33207402204022973,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.06681448632668145
+   },
+   {
+    "model": "openai/gpt-4o",
+    "family": "gpt",
+    "jsd": 0.3399823395112887,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.08144863266814487
+   },
+   {
+    "model": "qwen/qwen3.6-35b-a3b",
+    "family": "qwen",
+    "jsd": 0.3439032297026601,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.09009608277900961
+   },
+   {
+    "model": "openai/gpt-4o-2024-08-06",
+    "family": "gpt",
+    "jsd": 0.34658235090564116,
+    "usableCells": 20,
+    "lowCoverage": false,
+    "percentile": 0.09623059866962307
+   }
+  ],
+  "verdict": {
+   "level": "no-reference",
+   "label": "参考库中无此型号",
+   "detail": "“grok-4.6”不在 165 个参考模型中，无法做同型号验证。下方是行为上最接近的已知模型排行（当前最近：x-ai/grok-4.3，平均 JSD 0.304），可据此推断其真实血统。"
+  }
+ },
+ "diagnostics": {
+  "requestsOk": 201,
+  "requestsFailed": 0,
+  "answerClasses": {
+   "valid": 201,
+   "invalid": 0,
+   "refusal": 0,
+   "empty": 0
+  },
+  "modelReportedMismatch": 201,
+  "modelReportedSample": "grok-4.6-build",
+  "cachedTokenResponses": 190,
+  "reasoningTraces": 201,
+  "truncatedAnswers": 0,
+  "medianLatencyMs": 6211,
+  "p95LatencyMs": 12264,
+  "cacheSuspect": {
+   "cell": "num10-random|en",
+   "share": 1
+  },
+  "errorSamples": []
+ },
+ "fingerprint": {
+  "num100-random|en": {
+   "n": 11,
+   "p": {
+    "42": 0.45454545454545453,
+    "47": 0.09090909090909091,
+    "57": 0.18181818181818182,
+    "67": 0.09090909090909091,
+    "73": 0.18181818181818182
+   }
+  },
+  "letter-random|en": {
+   "n": 10,
+   "p": {
+    "k": 0.2,
+    "q": 0.3,
+    "g": 0.1,
+    "x": 0.1,
+    "m": 0.1,
+    "j": 0.1,
+    "z": 0.1
+   }
+  },
+  "coin-flip|zh": {
+   "n": 10,
+   "p": {
+    "h": 0.9,
+    "t": 0.1
+   }
+  },
+  "num10-random|zh": {
+   "n": 10,
+   "p": {
+    "6": 0.1,
+    "7": 0.9
+   }
+  },
+  "letter-random|zh": {
+   "n": 10,
+   "p": {
+    "风": 0.4,
+    "龙": 0.3,
+    "山": 0.1,
+    "月": 0.1,
+    "好": 0.1
+   }
+  },
+  "num10-random|en": {
+   "n": 10,
+   "p": {
+    "7": 1
+   }
+  },
+  "word-random|zh": {
+   "n": 10,
+   "p": {
+    "apple": 0.5,
+    "banana": 0.1,
+    "elephant": 0.1,
+    "ocean": 0.2,
+    "太阳": 0.1
+   }
+  },
+  "word-random|en": {
+   "n": 10,
+   "p": {
+    "apple": 0.4,
+    "banana": 0.1,
+    "xylophone": 0.1,
+    "serendipity": 0.1,
+    "quantum": 0.1,
+    "quasar": 0.1,
+    "kangaroo": 0.1
+   }
+  },
+  "num-favorite|zh": {
+   "n": 10,
+   "p": {
+    "42": 1
+   }
+  },
+  "num-favorite|en": {
+   "n": 10,
+   "p": {
+    "7": 0.1,
+    "42": 0.9
+   }
+  },
+  "city-random|en": {
+   "n": 10,
+   "p": {
+    "tokyo": 0.8,
+    "paris": 0.2
+   }
+  },
+  "color-random|zh": {
+   "n": 10,
+   "p": {
+    "蓝色": 0.8,
+    "红色": 0.1,
+    "blue": 0.1
+   }
+  },
+  "coin-flip|en": {
+   "n": 10,
+   "p": {
+    "h": 0.7,
+    "t": 0.3
+   }
+  },
+  "num100-random|zh": {
+   "n": 10,
+   "p": {
+    "42": 0.3,
+    "57": 0.2,
+    "63": 0.1,
+    "67": 0.2,
+    "73": 0.2
+   }
+  },
+  "animal-random|en": {
+   "n": 10,
+   "p": {
+    "lion": 0.1,
+    "giraffe": 0.1,
+    "panda": 0.1,
+    "zebra": 0.1,
+    "elephant": 0.5,
+    "tiger": 0.1
+   }
+  },
+  "color-favorite|zh": {
+   "n": 10,
+   "p": {
+    "蓝色": 1
+   }
+  },
+  "animal-random|zh": {
+   "n": 10,
+   "p": {
+    "大象": 0.1,
+    "giraffe": 0.1,
+    "狗": 0.1,
+    "tiger": 0.2,
+    "lion": 0.1,
+    "elephant": 0.1,
+    "猫": 0.2,
+    "老虎": 0.1
+   }
+  },
+  "city-random|zh": {
+   "n": 10,
+   "p": {
+    "london": 0.1,
+    "paris": 0.2,
+    "东京<|eos|>": 0.1,
+    "tokyo": 0.6
+   }
+  },
+  "color-favorite|en": {
+   "n": 10,
+   "p": {
+    "blue": 1
+   }
+  },
+  "color-random|en": {
+   "n": 10,
+   "p": {
+    "blue": 0.6,
+    "indigo": 0.1,
+    "magenta": 0.1,
+    "azure": 0.1,
+    "cyan": 0.1
+   }
+  }
+ }
+}

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>ModelProof — 中转站模型身份辨认</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">Model<span>Proof</span></div>
+    <nav>
+      <button data-tab="run" class="active">检测</button>
+      <button data-tab="reports">报告 <span id="report-count"></span></button>
+      <button data-tab="about">关于</button>
+    </nav>
+    <div class="spacer"></div>
+    <div class="conn-state" id="conn-state">未连接</div>
+  </header>
+
+  <main>
+    <!-- ============ 检测 ============ -->
+    <section id="tab-run" class="tab active">
+      <div class="card">
+        <h2>连接中转站</h2>
+        <div class="row">
+          <div class="field" style="flex: 2">
+            <label>API 地址（Base URL，可含或不含 /v1）</label>
+            <input type="text" id="base-url" placeholder="https://api.example.com/v1" spellcheck="false" />
+          </div>
+          <div class="field" style="flex: 1.4">
+            <label>API Key（仅保存在内存，关闭窗口即清除）</label>
+            <input type="password" id="api-key" placeholder="sk-..." spellcheck="false" autocomplete="off" />
+          </div>
+          <button class="ghost" id="btn-eye" title="显示/隐藏 Key">显示</button>
+          <button class="primary" id="btn-connect">连接并获取模型列表</button>
+        </div>
+        <div class="hint" id="connect-hint"></div>
+
+        <div id="model-panel">
+          <div class="model-toolbar">
+            <input type="text" id="model-search" placeholder="搜索模型…" style="max-width: 260px" spellcheck="false" />
+            <button class="ghost" id="btn-select-all">全选</button>
+            <button class="ghost" id="btn-clear-sel">清空</button>
+            <span class="hint" id="sel-count"></span>
+          </div>
+          <div class="model-list" id="model-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>探测方案</h2>
+        <div class="radio-row" id="profile-row">
+          <label><input type="radio" name="profile" value="quick" /> 快速（~100 次请求）</label>
+          <label><input type="radio" name="profile" value="standard" checked /> 标准（~480 次请求）</label>
+          <label><input type="radio" name="profile" value="strict" /> 严格（~1000 次请求）</label>
+          <label><input type="radio" name="profile" value="custom" /> 自定义</label>
+        </div>
+        <div class="lang-row" id="lang-row">
+          <label><input type="checkbox" value="en" checked disabled class="lang-cb" /> 英语</label>
+          <label><input type="checkbox" value="ru" class="lang-cb" /> 俄语</label>
+          <label><input type="checkbox" value="zh" class="lang-cb" /> 中文</label>
+          <label><input type="checkbox" value="ar" class="lang-cb" /> 阿拉伯语</label>
+          <span class="hint">语言维度越多，判定越稳。快速档仅用英语。</span>
+        </div>
+        <div class="row" id="custom-row" style="display:none">
+          <div class="field" style="max-width:220px">
+            <label>每维度重复次数（5–40）</label>
+            <input type="text" id="reps-input" value="12" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="field" style="max-width:260px">
+            <label>并发请求数：<span id="conc-val">6</span>（中转站限流严就调低）</label>
+            <input type="range" id="concurrency" min="1" max="16" value="6" />
+          </div>
+          <div class="spacer"></div>
+          <button class="primary" id="btn-start" disabled>开始检测</button>
+        </div>
+        <div class="radio-row" style="margin-top:2px">
+          <label><input type="checkbox" id="allow-reasoning" />
+            容忍隐藏思维链响应（推理型模型端点；默认关闭以保持论文严格协议）</label>
+        </div>
+        <div class="hint">
+          原理：向端点发送 10 类「随机说一个数/词」的单 token 问题（温度=1），构建答案分布指纹，
+          与论文实测的 165 个参考模型比对 Jensen-Shannon 散度。判定阈值：≤0.25 相符 ·
+          0.25–0.35 存疑 · &gt;0.35 高概率不符。
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 报告 ============ -->
+    <section id="tab-reports" class="tab">
+      <div id="queue-wrap">
+        <div class="empty-tip" id="queue-empty">尚无检测任务。到「检测」页连接中转站并选择模型开始。</div>
+        <div class="queue" id="queue"></div>
+      </div>
+      <div class="detail" id="detail"></div>
+    </section>
+
+    <!-- ============ 关于 ============ -->
+    <section id="tab-about" class="tab">
+      <div class="card about-body">
+        <h3>这是什么</h3>
+        ModelProof 用于检验 API 中转站 / 代理商是否在用其它模型冒充你所购买的模型（俗称“注水”）。
+        方法来自 Tomáš Bruckner（布拉格经济大学）的论文
+        <em>One Token Is Enough: Fingerprinting and Verifying Large Language Models from
+        Single-Token Output Distributions</em>（arXiv:2607.10252, 2026）。
+        <h3>原理</h3>
+        每个模型对“随便说一个 1–100 的数字”这类问题都有独特而稳定的偏好分布：GPT 系偏爱 42、73，
+        其它家族各有各的习惯，连“正面/反面”“喜欢的颜色”都带着家族口音。把 10 类单 token 问题 ×
+        4 种语言的答案分布拼在一起，就得到该模型的<b>行为指纹</b>。论文实测：同模型不同采样之间平均
+        JSD ≈ 0.14，跨服务商 ≈ 0.23，而不同模型的中位数距离是 0.46；完整 40 维度电池的验证
+        AUC=0.971、EER=7.3%。
+        <h3>如何解读结果</h3>
+        <table class="kbd-table">
+          <tr><td><code>≤ 0.25</code></td><td>与声称型号相符 —— 在跨服务商的正常波动范围内</td></tr>
+          <tr><td><code>0.25 – 0.35</code></td><td>存疑 —— 可能只是换了上游部署/量化版本，也可能是轻量替换</td></tr>
+          <tr><td><code>&gt; 0.35</code></td><td>高概率不符 —— 行为学上无法用声称型号解释</td></tr>
+        </table>
+        「最像模型排行」会给出行为上最接近的已知模型：如果榜首不是你买的那个，就是最直接的注水证据。
+        <h3>局限</h3>
+        这是行为学证据而非密码学证明。以下情况会造成干扰：端点注入自己的系统提示词、推理型模型隐藏思维链、
+        服务端缓存重复应答、以及参考库未覆盖的小众模型（此时只给最近邻排行）。应用会对这些信号给出提示。
+        <h3>数据与许可</h3>
+        参考指纹库提取自 Zenodo 数据集 <code>doi:10.5281/zenodo.21278557</code>（CC-BY-4.0）；
+        探测协议复刻自其配套软件 <code>doi:10.5281/zenodo.21278793</code>（MIT），prompt 文件逐字节一致并通过
+        SHA-256 校验。<br />本应用代码以 MIT 许可发布。
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

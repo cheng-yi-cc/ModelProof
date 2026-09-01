@@ -1,0 +1,19 @@
+{
+  "name": "modelproof",
+  "productName": "ModelProof",
+  "version": "0.1.0",
+  "description": "中转站模型身份辨认 / 注水检测 — 基于 PAMELA 单token行为指纹方法 (arXiv:2607.10252)",
+  "main": "src/main/main.js",
+  "type": "module",
+  "license": "MIT",
+  "author": "",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "build:reference": "node scripts/build-reference.mjs",
+    "mock": "node scripts/mock-relay.mjs"
+  },
+  "devDependencies": {
+    "electron": "^37.2.3"
+  }
+}
