@@ -6,7 +6,7 @@
   "main": "src/main/main.js",
   "type": "module",
   "license": "MIT",
-  "author": "",
+  "author": "cheng-yi-cc <450573577@qq.com>",
   "scripts": {
     "start": "electron .",
     "test": "node --test",
@@ -83,6 +83,8 @@
       "artifactName": "${productName}-${version}-mac-${arch}.${ext}"
     },
     "linux": {
+      "maintainer": "cheng-yi-cc <450573577@qq.com>",
+      "desktopName": "ModelProof",
       "target": [
         {
           "target": "AppImage",

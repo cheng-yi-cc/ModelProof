@@ -18,13 +18,14 @@ const PROMPTS_PATH = path.join(
   'prompts.json'
 );
 
-const fileBytes = readFileSync(PROMPTS_PATH);
+const rawStr = readFileSync(PROMPTS_PATH, 'utf8').replace(/\r\n/g, '\n');
+const fileBytes = Buffer.from(rawStr, 'utf8');
 const actualSha = createHash('sha256').update(fileBytes).digest('hex');
 if (actualSha !== EXPECTED_PROMPTS_SHA256) {
   throw new Error(`prompts.json integrity check failed: ${actualSha}`);
 }
 
-export const PROTOCOL = JSON.parse(fileBytes.toString('utf8'));
+export const PROTOCOL = JSON.parse(rawStr);
 
 // Study-A battery (paper 1): 10 tasks x 4 languages = 40 cells.
 const STUDY_A_TASKS = PROTOCOL.tasks.filter((t) => t.paper === 1);
