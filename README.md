@@ -3,8 +3,8 @@
 检测 API 中转站（代理商）是否在用其它模型冒充你所购买的模型。
 
 输入中转站地址和 API Key，应用会向端点发送约 100–1000 次廉价的「单 token」探测请求
-（如"随便说一个 1–100 的数字"、"抛硬币"），构建该端点的**行为指纹**，与论文实测的
-165 个参考模型比对，判定它到底像不像声称的那个型号。
+（如"随便说一个 1–100 的数字"、"抛硬币"），构建该端点的**行为指纹**，与官方收录的
+182 个参考模型比对，判定它到底像不像声称的那个型号。
 
 方法来源：Bruckner, *One Token Is Enough* (arXiv:2607.10252, 2026)。
 完整许可与引用见 [ATTRIBUTION.md](ATTRIBUTION.md)。
@@ -62,19 +62,19 @@ npm run mock -- --claim openai/gpt-4o-mini --serve z-ai/glm-4.5-air --port 8377
 ## 测试
 
 ```powershell
-npm test                 # 单元 + mock 端到端（21 个用例）
+npm test                 # 单元 + mock 端到端（23 个用例）
 node scripts/ui-smoke.mjs # 启动真实窗口做 UI 全流程冒烟测试
 ```
 
 ## 项目结构
 
 ```
-src/core/        方法论引擎（协议/归一化/JSD/客户端/审计/分析），零第三方依赖
+src/core/        方法论引擎（协议/归一化/JSD/客户端/采集/审计/分析），零第三方依赖
 src/main/        Electron 主进程 + preload(CJS)
 src/renderer/    中文界面
-assets/          生成的参考指纹库（165 模型 × Study-A 40 维度）+ 距离背景
+assets/          生成的参考指纹库（182 模型 × Study-A 40 维度）+ 距离背景
 vendor/pamela/   论文数据与 prompt 原件（CC-BY-4.0 / MIT）
-scripts/         参考库生成、mock 中转站、UI 冒烟测试
+scripts/         参考库生成、指纹采集拓展、mock 中转站、UI 冒烟测试
 tests/           单元测试 + mock 端到端测试
 ```
 

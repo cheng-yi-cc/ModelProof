@@ -28,12 +28,14 @@ for (const task of prompts.tasks) {
 }
 
 function sampleFrom(dist) {
+  const keys = Object.keys(dist || {});
+  if (keys.length === 0) return 'invalid';
   let r = Math.random();
   for (const [ans, p] of Object.entries(dist)) {
     r -= p;
     if (r <= 0) return ans;
   }
-  return Object.keys(dist)[0];
+  return keys[0];
 }
 
 export function createMockRelay({ port = 0, claimModel, serveModel, latencyMs = 25, requireStream = false, emitReasoning = false } = {}) {

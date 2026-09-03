@@ -30,6 +30,7 @@ export function analyze({ fingerprint, refDb, context, claimedModel }) {
       ranking.push({
         model: id,
         family: entry.family,
+        source: entry.source ?? 'official',
         jsd: sum / used,
         usableCells: used,
         lowCoverage: used < MIN_USABLE_CELLS,
@@ -77,7 +78,7 @@ export function analyze({ fingerprint, refDb, context, claimedModel }) {
     out.verdict = {
       level: 'no-reference',
       label: '参考库中无此型号',
-      detail: `“${claimedModel}”不在 165 个参考模型中，无法做同型号验证。下方是行为上最接近的已知模型排行（当前最近：${best.model}，平均 JSD ${best.jsd.toFixed(3)}），可据此推断其真实血统。`,
+      detail: `“${claimedModel}”不在参考指纹库中，无法做同型号验证。下方是行为上最接近的已知模型排行（当前最近：${best.model}，平均 JSD ${best.jsd.toFixed(3)}），可据此推断其真实血统。`,
     };
     return out;
   }

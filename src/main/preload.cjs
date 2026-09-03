@@ -12,4 +12,17 @@ contextBridge.exposeInMainWorld('modelproof', {
     ipcRenderer.on('audit:event', listener);
     return () => ipcRenderer.removeListener('audit:event', listener);
   },
+  // OpenRouter fingerprint collection
+  orModels: (apiKey) => ipcRenderer.invoke('or:models', { apiKey }),
+  orEndpoints: (apiKey, model) => ipcRenderer.invoke('or:endpoints', { apiKey, model }),
+  collectStart: (cfg) => ipcRenderer.invoke('collect:start', cfg),
+  collectCancel: (id) => ipcRenderer.invoke('collect:cancel', { id }),
+  onCollectEvent: (cb) => {
+    const listener = (_e, evt) => cb(evt);
+    ipcRenderer.on('collect:event', listener);
+    return () => ipcRenderer.removeListener('collect:event', listener);
+  },
+  // Fingerprint library
+  libraryAll: () => ipcRenderer.invoke('library:all'),
+  libraryDelete: (id) => ipcRenderer.invoke('library:user:delete', { id }),
 });

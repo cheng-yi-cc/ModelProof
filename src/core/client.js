@@ -87,7 +87,10 @@ export class RelayClient {
   // One probe completion. Retries transient failures; adapts body for strict
   // endpoints. Returns {ok, raw, finishReason, reasoningLen, modelReported,
   // usage, latencyMs} or {ok:false, error, retryable}.
-  async chat({ model, system, user, maxTokens = 16 }) {
+  // `provider` is an optional OpenRouter routing hint, e.g.
+  // { order: ['OpenAI'], allow_fallbacks: false } — dropped automatically if
+  // the endpoint rejects it as an unknown field.
+  async chat({ model, system, user, maxTokens = 16, provider }) {
     const commonBody = {
       model,
       messages: [
@@ -96,16 +99,32 @@ export class RelayClient {
       ],
       temperature: 1,
       max_tokens: maxTokens,
+      ...(provider ? { provider } : {}),
     };
 
     let override = {};
-    let includeReasoningFlag = true;
+    let reasoningStage = 0; // 0: effort 'none' (suppress thinking), 1: effort 'low', 2: drop reasoning param
+    let includeProviderFlag = Boolean(provider);
     const t0 = Date.now();
 
     for (let attempt = 0; ; attempt++) {
-      const withReasoning = includeReasoningFlag ? { reasoning: { enabled: false } } : {};
+      let withReasoning = {};
+      let effMaxTokens = override.max_tokens ?? maxTokens;
+      if (reasoningStage === 0) {
+        withReasoning = { reasoning: { effort: 'none', exclude: true } };
+      } else if (reasoningStage === 1) {
+        withReasoning = { reasoning: { effort: 'low', exclude: true } };
+        effMaxTokens = Math.max(effMaxTokens, 64);
+      }
       const stream = this.forceStream;
-      const body = { ...commonBody, ...withReasoning, ...override, ...(stream ? { stream: true } : {}) };
+      const body = {
+        ...commonBody,
+        max_tokens: effMaxTokens,
+        ...withReasoning,
+        ...override,
+        ...(stream ? { stream: true } : {}),
+      };
+      if (!includeProviderFlag) delete body.provider;
 
       let res;
       try {
@@ -122,10 +141,20 @@ export class RelayClient {
         const errText = await res.text().catch(() => '');
         const msg = extractErrMessage(res.status, errText);
         const lower = msg.toLowerCase();
-        // Strict endpoints reject unknown fields -> drop the OpenRouter-only flag.
-        if (includeReasoningFlag && res.status === 400 &&
+        // Strict endpoints reject unknown fields, or models requiring reasoning reject effort 'none' -> downgrade or drop.
+        if (reasoningStage < 2 && res.status === 400 &&
             /(reasoning|unrecognized|unknown|unexpected|invalid.*(field|parameter)|额外|未知)/.test(lower)) {
-          includeReasoningFlag = false;
+          // If the endpoint complains about reasoning effort / mandatory, try 'low' first; otherwise drop.
+          if (reasoningStage === 0 && /(effort|mandatory|supported_efforts|require)/.test(lower)) {
+            reasoningStage = 1;
+          } else {
+            reasoningStage = 2;
+          }
+          continue;
+        }
+        // Same for the provider-pinning hint on non-OpenRouter endpoints.
+        if (includeProviderFlag && res.status === 400 && /\bprovider\b/.test(lower)) {
+          includeProviderFlag = false;
           continue;
         }
         // Endpoint demands streaming -> latch and retry.
@@ -139,7 +168,11 @@ export class RelayClient {
           override.max_tokens = 64;
           continue;
         }
-        const retryable = res.status === 429 || res.status >= 500 || res.status === 408 || res.status === 402;
+        const isQuotaExceeded = res.status === 402 || /(insufficient.*credits|payment.*required|credit.*balance|quota.*exceeded|欠费|余额不足|额度不足)/i.test(lower);
+        if (isQuotaExceeded) {
+          return { ok: false, error: msg, status: 402, retryable: false, isQuotaExceeded: true };
+        }
+        const retryable = res.status === 429 || res.status >= 500 || res.status === 408;
         if (retryable && attempt < 4) {
           await sleep(backoff(attempt));
           continue;
@@ -157,9 +190,14 @@ export class RelayClient {
 
       if (parsed.error) {
         const code = parsed.error.code ?? res.status;
+        const errMsg = String(parsed.error.message ?? JSON.stringify(parsed.error));
+        const isQuota = code === 402 || /(insufficient.*credits|payment.*required|credit.*balance|quota.*exceeded|欠费|余额不足|额度不足)/i.test(errMsg);
+        if (isQuota) {
+          return { ok: false, error: errMsg, status: 402, retryable: false, isQuotaExceeded: true };
+        }
         const retryable = [429, 502, 503].includes(code);
         if (retryable && attempt < 4) { await sleep(backoff(attempt)); continue; }
-        return { ok: false, error: String(parsed.error.message ?? JSON.stringify(parsed.error)).slice(0, 300), retryable };
+        return { ok: false, error: errMsg.slice(0, 300), retryable };
       }
 
       const choice = parsed.choices?.[0];
@@ -168,6 +206,12 @@ export class RelayClient {
       // message-shaped object, so both paths converge here.
       const content = message?.content ?? choice?.delta?.content ?? null;
       const reasoning = message?.reasoning ?? message?.reasoning_content ?? null;
+
+      // If content was cut off because reasoning tokens ate up max_tokens: retry once with max_tokens: 64
+      if ((content == null || !String(content).trim()) && choice?.finish_reason === 'length' && attempt < 2 && !override.max_tokens) {
+        override.max_tokens = 64;
+        continue;
+      }
       return {
         ok: true,
         raw: content,

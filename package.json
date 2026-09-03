@@ -11,6 +11,7 @@
     "start": "electron .",
     "test": "node --test",
     "build:reference": "node scripts/build-reference.mjs",
+    "collect:fingerprints": "node scripts/collect-fingerprints.mjs",
     "mock": "node scripts/mock-relay.mjs",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
