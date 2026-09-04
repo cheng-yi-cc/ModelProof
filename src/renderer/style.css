@@ -418,3 +418,110 @@ details summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ============ 右上角更新提示按钮 ============ */
+.update-action-btn {
+  position: fixed;
+  top: 14px;
+  right: 22px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  font-family: inherit;
+  transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: updateSlideIn .35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.update-action-btn:hover {
+  background: var(--hover);
+  border-color: var(--text);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.update-action-btn:active {
+  transform: translateY(0);
+}
+
+.update-btn-inner {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px 6px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  position: relative;
+}
+
+.update-arrow-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--good);
+  flex-shrink: 0;
+  animation: updateBounce 1.8s infinite ease-in-out;
+}
+
+.update-dot {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 8px var(--good);
+}
+
+.update-text {
+  letter-spacing: .1px;
+}
+
+.update-progress-bar {
+  height: 2.5px;
+  background: var(--good);
+  width: 0%;
+  transition: width .15s ease-out;
+}
+
+.update-action-btn.downloading .update-arrow-icon {
+  animation: updateSpin 0.9s linear infinite;
+}
+
+.update-action-btn.downloading .update-dot {
+  background: var(--link);
+  box-shadow: 0 0 8px var(--link);
+}
+
+.update-action-btn.downloading .update-progress-bar {
+  background: var(--link);
+}
+
+.update-action-btn.installing .update-arrow-icon {
+  animation: updateSpin 0.6s linear infinite;
+  color: var(--purple);
+}
+
+@keyframes updateBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2.5px); }
+}
+
+@keyframes updateSpin {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes updateSlideIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+

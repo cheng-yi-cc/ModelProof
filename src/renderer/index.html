@@ -9,6 +9,18 @@
 </head>
 <body>
   <div class="app">
+    <!-- ============ 右上角更新提示按钮 ============ -->
+    <button id="update-action-btn" class="update-action-btn" style="display: none;" title="发现新版本，点击自动安装并重启">
+      <div class="update-btn-inner">
+        <svg class="update-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v13m0 0l-5-5m5 5l5-5M5 21h14"/>
+        </svg>
+        <span class="update-dot"></span>
+        <span class="update-text" id="update-text">新版本</span>
+      </div>
+      <div class="update-progress-bar" id="update-progress-bar" style="width: 0%"></div>
+    </button>
+
     <!-- ============ 侧边栏 ============ -->
     <aside class="sidebar">
       <div class="side-top">
@@ -271,6 +283,7 @@
           参考指纹库提取自 Zenodo 数据集 <code>doi:10.5281/zenodo.21278557</code>（CC-BY-4.0）；
           探测协议复刻自其配套软件 <code>doi:10.5281/zenodo.21278793</code>（MIT），prompt 文件逐字节一致并通过
           SHA-256 校验。<br />本应用代码以 MIT 许可发布。
+          <p style="margin-top: 14px; color: var(--muted); font-size: 12.5px;">当前版本：v<span id="app-version">0.1.1</span> · <a href="#" id="btn-manual-check" style="color: var(--link); text-decoration: none;">立即检查更新</a></p>
         </div>
       </section>
     </main>

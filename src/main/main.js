@@ -6,6 +6,10 @@ import { RelayClient } from '../core/client.js';
 import { AuditRunner } from '../core/audit.js';
 import { analyze } from '../core/analyze.js';
 import { FingerprintCollector, inferFamily } from '../core/collector.js';
+import { AppUpdater } from './updater.js';
+
+let mainWindow = null;
+let updater = null;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -135,14 +139,32 @@ function createWindow() {
       nodeIntegration: false,
     },
   });
+  mainWindow = win;
+  win.on('closed', () => {
+    if (mainWindow === win) mainWindow = null;
+  });
+  win.webContents.on('did-finish-load', () => {
+    // 启动后延迟 1.5 秒开机自动检测更新，确保界面渲染平稳
+    setTimeout(() => {
+      updater?.checkForUpdates({ silent: true });
+    }, 1500);
+  });
   win.loadFile(path.join(ROOT, 'src', 'renderer', 'index.html'));
 }
 
 app.whenReady().then(() => {
+  updater = new AppUpdater({
+    currentVersion: app.getVersion(),
+    getWindow: () => mainWindow,
+  });
+
+  ipcMain.handle('updater:check', () => updater.checkForUpdates({ silent: false }));
+  ipcMain.handle('updater:install', () => updater.downloadAndInstall());
+  ipcMain.handle('updater:status', () => updater.getState());
   ipcMain.handle('app:info', () => {
     const user = loadUserDb();
     return {
-      versions: { electron: process.versions.electron, node: process.versions.node },
+      versions: { electron: process.versions.electron, node: process.versions.node, app: app.getVersion() },
       refMeta: {
         ...refDb.meta,
         distances: undefined,

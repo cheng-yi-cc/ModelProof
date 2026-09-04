@@ -1230,3 +1230,100 @@ function showCollectResult(model, evt) {
   });
   actions.append(goBtn, againBtn);
 }
+
+/* ---------------- auto-updater ---------------- */
+(function initUpdater() {
+  const updateBtn = $('#update-action-btn');
+  const updateText = $('#update-text');
+  const progressBar = $('#update-progress-bar');
+  if (!updateBtn || !window.modelproof?.onUpdateEvent) return;
+
+  let updateInfo = null;
+  let isDownloading = false;
+
+  window.modelproof.onUpdateEvent((evt) => {
+    if (evt.type === 'available') {
+      updateInfo = evt;
+      updateBtn.style.display = 'flex';
+      updateBtn.className = 'update-action-btn';
+      updateText.textContent = `升级至 v${evt.version}`;
+      updateBtn.title = `发现新版本 v${evt.version}，点击自动安装更新并重启`;
+    } else if (evt.type === 'downloading' || evt.type === 'progress') {
+      isDownloading = true;
+      updateBtn.style.display = 'flex';
+      updateBtn.classList.add('downloading');
+      const pct = evt.percent ?? 0;
+      progressBar.style.width = `${pct}%`;
+      updateText.textContent = `下载中 ${pct}%`;
+      updateBtn.title = `正在下载更新 (${pct}%)，完成后将自动重启并完成安装`;
+    } else if (evt.type === 'downloaded' || evt.type === 'installing') {
+      isDownloading = false;
+      updateBtn.classList.remove('downloading');
+      updateBtn.classList.add('installing');
+      progressBar.style.width = '100%';
+      updateText.textContent = '正在安装并重启...';
+      updateBtn.title = '更新安装包已就绪，正在静默安装并重启应用...';
+    } else if (evt.type === 'dev-mode-installed') {
+      isDownloading = false;
+      updateBtn.classList.remove('downloading', 'installing');
+      updateText.textContent = '已就绪 (开发模式)';
+      alert(evt.message || '开发模式下已下载更新文件，在打包版本中会自动静默安装并重启。');
+    } else if (evt.type === 'error') {
+      isDownloading = false;
+      updateBtn.classList.remove('downloading', 'installing');
+      updateText.textContent = '更新重试';
+      updateBtn.title = `更新失败: ${evt.message || '未知错误'}，点击重试`;
+    }
+  });
+
+  updateBtn.addEventListener('click', async () => {
+    if (isDownloading) return;
+    updateText.textContent = '准备下载...';
+    updateBtn.classList.add('downloading');
+    progressBar.style.width = '0%';
+    try {
+      const res = await window.modelproof.startInstallUpdate();
+      if (res && res.error) {
+        alert(`自动更新失败: ${res.error}`);
+        updateText.textContent = '更新重试';
+        updateBtn.classList.remove('downloading');
+      }
+    } catch (err) {
+      alert(`自动更新异常: ${err?.message || err}`);
+      updateText.textContent = '更新重试';
+      updateBtn.classList.remove('downloading');
+    }
+  });
+
+  const appVerEl = $('#app-version');
+  const btnCheck = $('#btn-manual-check');
+
+  if (window.modelproof?.appInfo) {
+    window.modelproof.appInfo().then((info) => {
+      if (info?.versions?.app && appVerEl) {
+        appVerEl.textContent = info.versions.app;
+      }
+    }).catch(() => {});
+  }
+
+  if (btnCheck) {
+    btnCheck.addEventListener('click', async (e) => {
+      e.preventDefault();
+      btnCheck.textContent = '正在检查…';
+      try {
+        const res = await window.modelproof.checkForUpdates();
+        if (res.state === 'available') {
+          btnCheck.textContent = `发现新版本 v${res.updateInfo?.version || ''}`;
+        } else if (res.state === 'idle') {
+          btnCheck.textContent = '当前已是最新版本';
+          setTimeout(() => { btnCheck.textContent = '立即检查更新'; }, 3000);
+        } else if (res.state === 'error') {
+          btnCheck.textContent = '检查失败，点击重试';
+        }
+      } catch {
+        btnCheck.textContent = '检查异常，点击重试';
+      }
+    });
+  }
+})();
+

@@ -25,4 +25,13 @@ contextBridge.exposeInMainWorld('modelproof', {
   // Fingerprint library
   libraryAll: () => ipcRenderer.invoke('library:all'),
   libraryDelete: (id) => ipcRenderer.invoke('library:user:delete', { id }),
+  // Auto-updater
+  onUpdateEvent: (cb) => {
+    const listener = (_e, evt) => cb(evt);
+    ipcRenderer.on('updater:event', listener);
+    return () => ipcRenderer.removeListener('updater:event', listener);
+  },
+  checkForUpdates: () => ipcRenderer.invoke('updater:check'),
+  installUpdate: () => ipcRenderer.invoke('updater:install'),
+  getUpdateStatus: () => ipcRenderer.invoke('updater:status'),
 });
